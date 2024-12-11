@@ -20,6 +20,7 @@ public:
 private slots:
     void on_Review_B_clicked();
     void on_GenerateLogin_B_clicked();
+    void on_GeneratPassword_B_clicked();
 
 private:
     Ui::MainWindow *ui;

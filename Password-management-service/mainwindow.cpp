@@ -75,3 +75,27 @@ void MainWindow::on_GenerateLogin_B_clicked()
     // Устанавливаем сгенерированный логин в поле ввода
     ui->Logint_L->setText(login);
 }
+
+void MainWindow::on_GeneratPassword_B_clicked()
+{
+    // Диапазоны символов
+    const QString letters = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
+    const QString digits = "0123456789";
+
+    // Определяем длину пароля
+    int length = QRandomGenerator::global()->bounded(20, 31); // От 20 до 30 включительно
+
+    QString password;
+
+    for (int i = 0; i < length; ++i) {
+        // Случайно выбираем: буква или цифра
+        if (QRandomGenerator::global()->bounded(2) == 0) {
+            password.append(letters[QRandomGenerator::global()->bounded(letters.size())]);
+        } else {
+            password.append(digits[QRandomGenerator::global()->bounded(digits.size())]);
+        }
+    }
+
+    // Устанавливаем сгенерированный пароль в поле ввода
+    ui->Password_L->setText(password);
+}
