@@ -17,7 +17,12 @@ public:
     MainWindow(QWidget *parent = nullptr);
     ~MainWindow();
 
+private slots:
+    void on_Review_B_clicked();
+
 private:
     Ui::MainWindow *ui;
+    // Новый метод для загрузки пути
+    void loadFilePath();
 };
 #endif // MAINWINDOW_H
