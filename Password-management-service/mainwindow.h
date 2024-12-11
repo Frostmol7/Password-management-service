@@ -21,10 +21,11 @@ private slots:
     void on_Review_B_clicked();
     void on_GenerateLogin_B_clicked();
     void on_GeneratPassword_B_clicked();
+    void on_Save_serch_B_clicked();
 
 private:
     Ui::MainWindow *ui;
-    // Новый метод для загрузки пути
-    void loadFilePath();
+    void loadFilePath(); // Новый метод для загрузки пути
+    void saveToMarkdownFile(); // Новый метод для сохранения в нужном формате
 };
 #endif // MAINWINDOW_H

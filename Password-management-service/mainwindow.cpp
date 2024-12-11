@@ -4,6 +4,7 @@
 #include <QMessageBox>
 #include <QSettings>
 #include <QRandomGenerator>
+#include <QTextStream>
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
@@ -98,4 +99,54 @@ void MainWindow::on_GeneratPassword_B_clicked()
 
     // Устанавливаем сгенерированный пароль в поле ввода
     ui->Password_L->setText(password);
+}
+
+void MainWindow::saveToMarkdownFile()
+{
+    // Проверяем, указан ли путь к файлу
+    QString filePath = ui->Path_L->text();
+    if (filePath.isEmpty()) {
+        QMessageBox::warning(this, "Ошибка", "Путь к файлу не указан!");
+        return;
+    }
+
+    QFile file(filePath);
+    if (!file.open(QIODevice::WriteOnly | QIODevice::Append | QIODevice::Text)) {
+        QMessageBox::warning(this, "Ошибка", "Не удалось открыть файл для записи!");
+        return;
+    }
+
+    QTextStream out(&file);
+    out.setCodec("UTF-8");
+
+    // Если файл пустой, добавляем заголовок таблицы
+    if (file.size() == 0) {
+        file.write("\xEF\xBB\xBF"); // UTF-8 BOM
+        out << "|login|password|site/app|\n";
+        out << "|-|-|-|\n";
+    }
+
+    // Получаем данные из полей ввода
+    QString login = ui->Logint_L->text().trimmed();
+    QString password = ui->Password_L->text().trimmed();
+    QString app = ui->App_L->text().trimmed();
+
+    // Проверяем, что все поля заполнены
+    if (login.isEmpty() || password.isEmpty() || app.isEmpty()) {
+        QMessageBox::warning(this, "Ошибка", "Заполните все поля перед сохранением!");
+        return;
+    }
+
+    // Добавляем строку в таблицу
+    out << "|" << login << "|" << password << "|" << app << "|\n";
+
+    file.close();
+
+    // Уведомление об успешном сохранении
+    QMessageBox::information(this, "Успех", "Данные успешно сохранены!");
+}
+
+void MainWindow::on_Save_serch_B_clicked()
+{
+    saveToMarkdownFile();
 }
