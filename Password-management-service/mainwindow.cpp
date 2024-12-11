@@ -3,6 +3,7 @@
 #include <QFileDialog>
 #include <QMessageBox>
 #include <QSettings>
+#include <QRandomGenerator>
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
@@ -48,4 +49,29 @@ void MainWindow::loadFilePath() {
     if (!filePath.isEmpty()) {
         ui->Path_L->setText(filePath);
     }
+}
+
+void MainWindow::on_GenerateLogin_B_clicked()
+{
+    // Диапазоны символов
+    const QString letters = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
+    const QString digits = "0123456789";
+
+    // Определяем длину логина
+    int length = QRandomGenerator::global()->bounded(8, 13); // От 8 до 12 включительно
+
+    QString login;
+    login.append(letters[QRandomGenerator::global()->bounded(letters.size())]); // Первый символ - буква
+
+    for (int i = 1; i < length; ++i) {
+        // Случайно выбираем: буква или цифра
+        if (QRandomGenerator::global()->bounded(2) == 0) {
+            login.append(letters[QRandomGenerator::global()->bounded(letters.size())]);
+        } else {
+            login.append(digits[QRandomGenerator::global()->bounded(digits.size())]);
+        }
+    }
+
+    // Устанавливаем сгенерированный логин в поле ввода
+    ui->Logint_L->setText(login);
 }
