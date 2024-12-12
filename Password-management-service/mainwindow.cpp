@@ -103,7 +103,6 @@ void MainWindow::on_GeneratPassword_B_clicked()
 
 void MainWindow::saveToMarkdownFile()
 {
-    // Проверяем, указан ли путь к файлу
     QString filePath = ui->Path_L->text();
     if (filePath.isEmpty()) {
         QMessageBox::warning(this, "Ошибка", "Путь к файлу не указан!");
@@ -111,40 +110,75 @@ void MainWindow::saveToMarkdownFile()
     }
 
     QFile file(filePath);
-    if (!file.open(QIODevice::WriteOnly | QIODevice::Append | QIODevice::Text)) {
-        QMessageBox::warning(this, "Ошибка", "Не удалось открыть файл для записи!");
+    if (!file.open(QIODevice::ReadWrite | QIODevice::Text)) {
+        QMessageBox::warning(this, "Ошибка", "Невозможно открыть файл для чтения/записи!");
         return;
     }
 
-    QTextStream out(&file);
-    out.setCodec("UTF-8");
+    QTextStream in(&file);
+    in.setCodec("UTF-8");
+    QString content = in.readAll();
+    file.seek(0); // Возвращаем указатель на начало файла
 
-    // Если файл пустой, добавляем заголовок таблицы
-    if (file.size() == 0) {
+    QString app = ui->App_L->text();
+    if (app.isEmpty()) {
+        QMessageBox::warning(this, "Ошибка", "Поле 'Сайт/Приложение' не заполнено!");
+        return;
+    }
+
+    QStringList lines = content.split('\n');
+    QString login, password;
+
+    // 3. Поиск записи
+    bool entryFound = false;
+    for (const QString &line : lines) {
+        QStringList columns = line.split('|');
+        if (columns.size() > 3 && columns[3].trimmed() == app) {
+            login = columns[1].trimmed();
+            password = columns[2].trimmed();
+            entryFound = true;
+            break;
+        }
+    }
+
+    if (entryFound) {
+        ui->Logint_L->setText(login);
+        ui->Password_L->setText(password);
+        file.close();
+        return;
+    }
+
+    // 4. Проверка заполненности логина и пароля
+    login = ui->Logint_L->text();
+    password = ui->Password_L->text();
+    if (login.isEmpty() || password.isEmpty()) {
+        QMessageBox::warning(this, "Ошибка", "Необходимо заполнить поля логина и пароля!");
+        return;
+    }
+
+    // 5. Проверка первых строк
+    if (lines.size() < 2 || !lines[0].contains("|Login|Password|App/Site|") || !lines[1].contains("|-|-|-|")) {
+        file.resize(0); // Очищаем файл
         file.write("\xEF\xBB\xBF"); // UTF-8 BOM
-        out << "|login|password|site/app|\n";
+        QTextStream out(&file);
+        out.setCodec("UTF-8");
+        out << "|Login|Password|App/Site|\n";
         out << "|-|-|-|\n";
     }
 
-    // Получаем данные из полей ввода
-    QString login = ui->Logint_L->text().trimmed();
-    QString password = ui->Password_L->text().trimmed();
-    QString app = ui->App_L->text().trimmed();
-
-    // Проверяем, что все поля заполнены
-    if (login.isEmpty() || password.isEmpty() || app.isEmpty()) {
-        QMessageBox::warning(this, "Ошибка", "Заполните все поля перед сохранением!");
-        return;
-    }
-
-    // Добавляем строку в таблицу
+    // 6. Добавление новой строки
+    QTextStream out(&file);
+    out.setCodec("UTF-8");
+    out.seek(file.size()); // Переходим в конец файла
     out << "|" << login << "|" << password << "|" << app << "|\n";
 
     file.close();
-
-    // Уведомление об успешном сохранении
-    QMessageBox::information(this, "Успех", "Данные успешно сохранены!");
 }
+
+
+
+
+
 
 void MainWindow::on_Save_serch_B_clicked()
 {
